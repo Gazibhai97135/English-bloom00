@@ -1,0 +1,153 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>English Bloom</title>
+<style>
+/* Basic styling from original */
+body { font-family: Poppins, sans-serif; background:#f4f8ff; margin:0; }
+header { background:#2e6cf6; color:#fff; text-align:center; padding:1.5rem; }
+main { max-width:900px; margin:1.5rem auto; background:#fff; padding:1.5rem; border-radius:10px; }
+footer { background:#2e6cf6; color:#fff; text-align:center; padding:1rem; margin-top:2rem; }
+.hidden { display:none; }
+input, button { padding:0.6rem; margin:0.3rem 0; width:100%; }
+.box { background:#eef3ff; padding:1rem; border-radius:8px; margin:1rem 0; }
+</style>
+</head>
+<body>
+<header>
+<h1>English Bloom</h1>
+<p>Learn & Practice English Easily</p>
+<a href="https://www.facebook.com/profile.php?id=61558138270184" style="color:white;">Creator: Rahul</a>
+</header><main id="mainContent">
+<!-- LOGIN SELECTION -->
+<div id="loginSelect">
+<h2>Select Login Type</h2>
+<button onclick="showAdminLogin()">Admin Login</button>
+<button onclick="showStudentLogin()">Student Login</button>
+</div><!-- ADMIN LOGIN --><div id="adminLogin" class="hidden box">
+<h2>Admin Login</h2>
+<input id="adminUser" placeholder="Admin Username" />
+<input id="adminPass" placeholder="Admin Password" type="password" />
+<button onclick="adminLoginCheck()">Login</button>
+</div><!-- STUDENT LOGIN --><div id="studentLogin" class="hidden box">
+<h2>Student Login</h2>
+<input id="stuUser" placeholder="Student Username" />
+<input id="stuPass" placeholder="Student Password" type="password" />
+<button onclick="studentLoginCheck()">Login</button>
+</div><!-- ADMIN PANEL --><div id="adminPanel" class="hidden">
+<h2>Admin Panel</h2><h3>Add New Student</h3>
+<input id="newStuUser" placeholder="New Username" />
+<input id="newStuPass" placeholder="New Password" />
+<button onclick="addStudent()">Add Student</button><h3>Delete Student</h3>
+<input id="delStuUser" placeholder="Username to Delete" />
+<button onclick="deleteStudent()">Delete</button><h3>Add Quiz</h3>
+<input id="quizAuthor" placeholder="Author (e.g., Rahul, Momo...)" />
+<textarea id="quizQ" placeholder="Question"></textarea>
+<input id="quizA" placeholder="Correct Answer" />
+<button onclick="addQuiz()">Add Quiz</button><h3>AI English Helper (Offline)</h3>
+<textarea id="aiInput" placeholder="Type a sentence..."></textarea>
+<button onclick="runAI()">Fix Sentence</button>
+<p id="aiOut"></p>
+</div><!-- STUDENT PANEL --><div id="studentPanel" class="hidden">
+<h2>Student Dashboard</h2>
+<div id="quizList"></div><h3>AI English Helper</h3>
+<textarea id="aiInput2" placeholder="Type a sentence..."></textarea>
+<button onclick="runAI2()">Fix Sentence</button>
+<p id="aiOut2"></p>
+</div></main><footer>
+Created by Rahul | English Bloom
+</footer><script>
+// LOCAL STORAGE INITIAL DATA
+if(!localStorage.getItem('students')){
+ localStorage.setItem('students', JSON.stringify({}));
+}
+if(!localStorage.getItem('quizzes')){
+ localStorage.setItem('quizzes', JSON.stringify([]));
+}
+
+// ADMIN LOGIN
+function showAdminLogin(){ document.getElementById('adminLogin').classList.remove('hidden'); document.getElementById('loginSelect').classList.add('hidden'); }
+function showStudentLogin(){ document.getElementById('studentLogin').classList.remove('hidden'); document.getElementById('loginSelect').classList.add('hidden'); }
+
+function adminLoginCheck(){
+ let u=document.getElementById('adminUser').value;
+ let p=document.getElementById('adminPass').value;
+ if(u==='rahul' && p==='rahul123'){
+ document.getElementById('adminPanel').classList.remove('hidden');
+ document.getElementById('adminLogin').classList.add('hidden');
+ }
+ else if(u==='sir' && p==='Hasankhan'){
+ document.getElementById('adminPanel').classList.remove('hidden');
+ document.getElementById('adminLogin').classList.add('hidden');
+ }
+ else alert('Wrong admin login');
+}
+
+// STUDENT LOGIN
+function studentLoginCheck(){
+ let stu = JSON.parse(localStorage.getItem('students'));
+ let u=document.getElementById('stuUser').value;
+ let p=document.getElementById('stuPass').value;
+ if(stu[u] && stu[u]===p){
+ document.getElementById('studentPanel').classList.remove('hidden');
+ document.getElementById('studentLogin').classList.add('hidden');
+ loadQuizzes();
+ } else alert('Incorrect student login');
+}
+
+// ADD STUDENT
+function addStudent(){
+ let u=document.getElementById('newStuUser').value;
+ let p=document.getElementById('newStuPass').value;
+ let stu=JSON.parse(localStorage.getItem('students'));
+ stu[u]=p;
+ localStorage.setItem('students', JSON.stringify(stu));
+ alert('Student Added');
+}
+
+// DELETE STUDENT
+function deleteStudent(){
+ let u=document.getElementById('delStuUser').value;
+ let stu=JSON.parse(localStorage.getItem('students'));
+ delete stu[u];
+ localStorage.setItem('students', JSON.stringify(stu));
+ alert('Student Deleted');
+}
+
+// ADD QUIZ
+function addQuiz(){
+ let author=document.getElementById('quizAuthor').value;
+ let q=document.getElementById('quizQ').value;
+ let a=document.getElementById('quizA').value;
+ let quizzes=JSON.parse(localStorage.getItem('quizzes'));
+ quizzes.push({author:author,question:q,answer:a});
+ localStorage.setItem('quizzes', JSON.stringify(quizzes));
+ alert('Quiz Added');
+}
+
+// LOAD QUIZZES FOR STUDENTS
+function loadQuizzes(){
+ let quizzes=JSON.parse(localStorage.getItem('quizzes'));
+ let box="";
+ quizzes.forEach((q,i)=>{
+ box+=`<div class='box'><b>${q.author}</b><br>${q.question}<br><input id='ans${i}'/><button onclick='checkQ(${i})'>Submit</button></div>`;
+ });
+ document.getElementById('quizList').innerHTML=box;
+}
+
+function checkQ(i){
+ let quizzes=JSON.parse(localStorage.getItem('quizzes'));
+ let userAns=document.getElementById("ans"+i).value;
+ if(userAns.toLowerCase().trim()===quizzes[i].answer.toLowerCase().trim()) alert('Correct!');
+ else alert('Wrong! Correct: '+quizzes[i].answer);
+}
+
+// AI ENGLISH HELPER (OFFLINE)
+function fixSentence(t){
+ return t.replace(/i /g,'I ').replace(/u /g,'you ').replace(/dont/g,"don't");
+}
+function runAI(){ document.getElementById('aiOut').innerText = fixSentence(document.getElementById('aiInput').value); }
+function runAI2(){ document.getElementById('aiOut2').innerText = fixSentence(document.getElementById('aiInput2').value); }
+</script></body>
+  </html>
